@@ -14,7 +14,8 @@ class Linear(object):
         self.out_features = out_features
 
         # Weight matrix (in_features, out_features)
-        self.weight = np.random.randn(out_features, in_features)
+        self.weight = np.random.randn(in_features, out_features)
+
         # Bias vector (out_features)
         if bias:
             self.bias = np.zeros(out_features)
@@ -23,6 +24,7 @@ class Linear(object):
         
         # Gradient of loss w.r.t. weight matrix
         self.dweight = None
+
         # Gradient of loss w.r.t. bias vector
         self.dbias = None
 
@@ -47,3 +49,17 @@ class Linear(object):
         self.dweight = np.dot(dout.T, self.x)
         self.dbias = np.sum(dout, axis=0)
         return np.dot(dout, self.weight.T)
+    
+    def update(self, lr: np.float64) -> None:
+        '''
+        Update weights and biases.
+        Params:
+            lr: learning rate
+        '''
+        self.weight -= lr * self.dweight
+        self.bias -= lr * self.dbias
+    
+    def __repr__(self) -> str:
+        return f'{self.name}({self.in_features}, {self.out_features})'
+    def __str__(self) -> str:
+        return f'{self.name}({self.in_features}, {self.out_features})'

@@ -1,4 +1,3 @@
 from .dataloader import MNISTDataLoader
-from .model import *
 from .utils import Config, ImageTransforms
-from .experiments import *
+from .model import Sigmoid, Softmax, Relu, Linear, NeuralNetwork

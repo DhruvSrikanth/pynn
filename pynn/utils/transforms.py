@@ -25,12 +25,12 @@ class ImageTransforms(object):
         """
         return image.resize(dims)
 
-    def normalize_tensor(self, tensor: np.ndarray ) -> np.ndarray:
+    def normalize_image(self, image: np.ndarray) -> np.ndarray:
         """
         Normalize a tensor.
         Parameters:
-            tensor: (type numpy.ndarray) tensor to normalize.
+            image: (type numpy.ndarray) image to normalize.
         Returns:
-            tensor: (type numpy.ndarray) normalized tensor.
+            image: (type numpy.ndarray) normalized image.
         """
-        return tensor / 255.0
+        return image / 255.0

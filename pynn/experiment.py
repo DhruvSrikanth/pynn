@@ -5,7 +5,7 @@ from .utils import Config, ImageTransforms
 import torch
 from torchvision import transforms
 
-class Experiments():
+class Experiment():
     def __init__(self, config: dict) -> None:
         '''
         Initialize the experiments.
