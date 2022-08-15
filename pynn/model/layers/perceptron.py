@@ -1,65 +1,94 @@
-import numpy as np
+import numpy as np  # import numpy library
 
 class Linear(object):
-    def __init__(self, in_features: np.int64, out_features: np.int64, bias: np.bool=True, name: str = 'Linear') -> None:
+    '''Perceptron Layer.'''
+    def __init__(self, in_features:np.ndarray, out_features:np.ndarray, bias:np.bool=True, initialization:np.str="random", name:np.str="Linear"):
         '''
-        Initialize linear layer.
-        Params:
-            in_features: number of input features
-            out_features: number of output features
-            bias: boolean to determine whether to include bias term
+        Intialize the Perceptron Layer.
+        **Parameters:**
+            `in_features`: number of input features.
+            `out_features`: number of output features.
+            `bias`: whether to use bias or not.
+            `initialization`: method of initialization. 
+                **Default:** `"random"`. 
+                **Valid values:** `"random"`, `"uniform"`, `"zeros"`, `"ones"`.
+            `name`: name of the layer.
         '''
-        self.name = name
         self.in_features = in_features
         self.out_features = out_features
+        self.initialization = initialization
+        self.bias = bias
+        self.name = name
 
-        # Weight matrix (in_features, out_features)
-        self.weight = np.random.randn(in_features, out_features)
+        # initialize weights and bias
+        initializer = {
+            'random' : np.random.randn, 
+            'uniform' : np.random.uniform, 
+            'zeros' : np.zeros,
+            'ones' : np.ones
+        }
 
-        # Bias vector (out_features)
-        if bias:
-            self.bias = np.zeros(out_features)
-        else:
-            self.bias = None
-        
-        # Gradient of loss w.r.t. weight matrix
-        self.dweight = None
+        self.params = {
+            'W': initializer[self.initialization](out_features, in_features),
+            'b': np.zeros((out_features, 1))
+        }
 
-        # Gradient of loss w.r.t. bias vector
-        self.dbias = None
+        # Forward prop
+        self.downstream_activation = None
+        self.fx = None
 
-    def forward(self, x: np.ndarray) -> np.ndarray:
-        '''
-        Forward pass of linear layer.
-        Params:
-            x: input data of shape (in_features, 1)
-        Returns:
-            out: output data of shape (out_features, 1)
-        '''
-        return np.dot(x, self.weight) + self.bias
-
-    def backward(self, dout):
-        '''
-        Backward pass of linear layer.
-        Params:
-            dout: gradient of loss w.r.t. output data of shape (out_features, 1)
-        Returns:
-            dx: gradient of loss w.r.t. input data of shape (in_features, 1)
-        '''
-        self.dweight = np.dot(dout.T, self.x)
-        self.dbias = np.sum(dout, axis=0)
-        return np.dot(dout, self.weight.T)
+        # Backward prop
+        self.dW = None
+        self.db = None
+        self.downstream_grad = None
     
-    def update(self, lr: np.float64) -> None:
-        '''
-        Update weights and biases.
-        Params:
-            lr: learning rate
-        '''
-        self.weight -= lr * self.dweight
-        self.bias -= lr * self.dbias
+    def __repr__(self):
+        return f"Linear Layer: {self.in_features} -> {self.out_features}"
     
-    def __repr__(self) -> str:
-        return f'{self.name}({self.in_features}, {self.out_features})'
-    def __str__(self) -> str:
-        return f'{self.name}({self.in_features}, {self.out_features})'
+    def __str__(self):
+        return f"Linear Layer: {self.in_features} -> {self.out_features}"
+    
+    def linear_transformation(self) -> np.ndarray:
+        '''
+        Linear transformation - **Z = Wx + b**.
+        **Returns:**
+            `Z`: transformed data.
+        '''
+        return np.dot(self.params['W'], self.downstream_activation) + self.params['b']
+
+    def forward(self, x:np.ndarray):
+        '''
+        Compute forward transformation - **y = Wx + b**.
+        **Parameters:**
+            `x`: input data.
+        **Returns:**
+            `fx`: transformed data.
+        '''
+        self.downstream_activation = x
+        self.fx = self.linear_transformation()
+        return self.fx
+
+    def backward(self, upstream_grad:np.ndarray) -> np.ndarray:
+        '''
+        Compute backward transformation - **dZ = dWx + db**.
+        **Parameters:**
+            `upstream_grad`: upstream gradient.
+        **Returns:**
+            `downstream_grad`: downstream gradient.
+        '''
+        self.dW = np.dot(upstream_grad, self.downstream_activation.T)
+        if self.bias:
+            self.db = np.sum(upstream_grad, axis=1, keepdims=True)
+        self.downstream_grad = np.dot(self.params['W'].T, upstream_grad)
+        return self.downstream_grad
+
+    def update_params(self, lr:np.float64):
+        '''
+        Update parameters based on gradient descent.
+        **Parameters:**
+            `lr`: learning rate.
+        '''
+        self.params['W'] = self.params['W'] - lr * self.dW
+        if self.bias:
+            self.params['b'] = self.params['b'] - lr * self.db
+    

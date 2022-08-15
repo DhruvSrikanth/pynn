@@ -1,0 +1,58 @@
+import numpy as np
+
+class MSE(object):
+    '''Objective function for - **Mean Squared Error.**'''
+    def __init__(self, name:np.str = 'Mean Squared Error'):
+        '''
+        Initialize a Mean Squared Error objective function.
+        **Parameters:**
+            `name`: name of the objective function.
+        '''
+        self.name = name
+        self.fx = None
+        self.local_grad = None
+    
+    def _mse(self, y, y_hat):
+        '''
+        Compute the Mean Squared Error.
+        **Parameters:**
+            `y`: true labels.
+            `y_hat`: predicted labels.
+        **Returns:**
+            `mse`: Mean Squared Error.
+        '''
+        return 0.5*np.mean((y - y_hat)**2)
+    
+    def _mse_grad(self, y, y_hat):
+        '''
+        Compute the gradient of the Mean Squared Error.
+        **Parameters:**
+            `y`: true labels.
+            `y_hat`: predicted labels.
+        **Returns:**
+            `mse_grad`: gradient of the Mean Squared Error.
+        '''
+        return (y_hat - y) / len(y_hat)
+    
+    def __call__(self, y, y_hat):
+        '''
+        Forward pass of the Mean Squared Error.
+        **Parameters:**
+            `y`: true labels.
+            `y_hat`: predicted labels.
+        **Returns:**
+            `mse`: Mean Squared Error.
+        '''
+        self.fx = self._mse(y, y_hat)
+        self.local_grad = self._mse_grad(y, y_hat)
+        return self.fx
+    
+    def backward(self):
+        '''
+        Backward pass of the Mean Squared Error.
+        **Returns:**
+            `downstream_derivative`: gradient of the Mean Squared Error.
+        '''
+        upstream_derivative = 1
+        downstream_derivative = upstream_derivative * self.local_grad
+        return downstream_derivative

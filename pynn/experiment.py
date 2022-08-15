@@ -1,6 +1,6 @@
 from .dataloader import get_dataloader
 from .model import VanillaGAN
-from .utils import Config, ImageTransforms
+from .utils import Config
 
 import torch
 from torchvision import transforms

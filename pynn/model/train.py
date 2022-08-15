@@ -3,21 +3,19 @@ from tqdm import tqdm
 from time import time
 from .nn import NeuralNetwork
 class Train(object):
-    def __init__(self) -> None:
-        '''
-        Initialize training object.
-        Params:
-            model: model to train
-        '''
+    def __init__(self):
+        '''Initialize a trainer.'''
     
-    def __call__(self, model: NeuralNetwork, train_set, val_set, L, lr, epochs: np.int64):
+    def __call__(self, model:NeuralNetwork, train_set, val_set, L, lr, epochs:np.int64):
         '''
-        Train the model.
-        Params:
-            model: model to train
-            train_set: training set
-            val_set: validation set
-            epochs: number of epochs to train for
+        Train a model.
+        **Parameters:**
+            `model`: model to train.
+            `train_set`: training set.
+            `val_set`: validation set.
+            `L`: objective function.
+            `lr`: learning rate.
+            `epochs`: number of epochs to train for.
         '''
         for epoch in range(epochs):
             print('-' * 50)
