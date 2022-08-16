@@ -1,5 +1,5 @@
 from .dataloader import get_dataloader
-from .model import VanillaGAN
+from .pynn.model import VanillaGAN
 from .utils import Config
 
 import torch
