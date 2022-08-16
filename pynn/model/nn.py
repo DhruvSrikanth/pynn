@@ -23,7 +23,7 @@ class NeuralNetwork(object):
         '''
         if block_name not in self.blocks:
             raise ValueError(f"Block name {block_name} not found. Valid block names are {', '.join(self.blocks.keys())}.")
-        self.blocks[block_name].append(layer)
+        self.blocks[block_name] = np.append(self.blocks[block_name], layer)
     
     def __call__(self, x:np.ndarray) -> np.ndarray:
         '''
@@ -37,7 +37,7 @@ class NeuralNetwork(object):
             for layer in self.blocks[block]:
                 x = layer(x)
         y_hat = x
-        return x
+        return y_hat
     
     def backward(self, upstream_grad: np.ndarray) -> np.ndarray:
         '''
@@ -63,3 +63,29 @@ class NeuralNetwork(object):
             for layer in self.blocks[block]:
                 if hasattr(layer, 'update_weights'):
                     layer.update_weights(learning_rate)
+    
+    def __repr__(self):
+        '''
+        Print the model summary.
+        '''
+        name = f"Model Summary - {self.name}:\n"
+        summary = '-' * len(name) + '\n'
+        for block in ['input', 'hidden', 'output']:
+            summary += f"{block.capitalize()} - \n"
+            for layer in self.blocks[block]:
+                summary += f"{layer.__repr__()}\n"
+        summary += '-' * len(name) + '\n'
+        summary = name + summary
+        return summary
+    
+    def __str__(self):
+        '''
+        Print the model summary.
+        '''
+        return self.__repr__()
+    
+    def summary(self):
+        '''
+        Print the model summary.
+        '''
+        return self.__repr__()

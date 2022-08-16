@@ -41,7 +41,7 @@ class Sigmoid(object):
         '''
         return self.fx * (1 - self.fx)
 
-    def forward(self, x:np.ndarray) -> np.ndarray:
+    def __call__(self, x:np.ndarray) -> np.ndarray:
         '''
         Compute forward transformation - **y = 1 / (1 + e^-x)**.
         **Parameters:**

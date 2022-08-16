@@ -56,7 +56,7 @@ class Linear(object):
         '''
         return np.dot(self.params['W'], self.downstream_activation) + self.params['b']
 
-    def forward(self, x:np.ndarray):
+    def __call__(self, x:np.ndarray):
         '''
         Compute forward transformation - **y = Wx + b**.
         **Parameters:**
@@ -64,6 +64,8 @@ class Linear(object):
         **Returns:**
             `fx`: transformed data.
         '''
+        if x.shape[0] != self.in_features:
+            x = x.flatten()
         self.downstream_activation = x
         self.fx = self.linear_transformation()
         return self.fx

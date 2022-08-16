@@ -56,3 +56,9 @@ class MSE(object):
         upstream_derivative = 1
         downstream_derivative = upstream_derivative * self.local_grad
         return downstream_derivative
+    
+    def __repr__(self):
+        return self.name
+    
+    def __str__(self):
+        return self.name
