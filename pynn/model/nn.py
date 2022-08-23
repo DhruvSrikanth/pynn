@@ -61,8 +61,8 @@ class NeuralNetwork(object):
         '''
         for block in ['input', 'hidden', 'output']:
             for layer in self.blocks[block]:
-                if hasattr(layer, 'update_weights'):
-                    layer.update_weights(learning_rate)
+                if hasattr(layer, 'update_params'):
+                    layer.update_params(learning_rate)
     
     def __repr__(self):
         '''

@@ -43,11 +43,10 @@ class Learner(object):
 
                         # Compute loss
                         minibatch_loss = L(minibatch_inference, minibatch_y)
-
                         if stage == 'train':
                             # Backward pass
                             model.backward(L.backward())
-                            # Update weights
+                            # Update 
                             model.update_weights(lr)
                         
                         minibatch_accuracy = np.mean(minibatch_inference == minibatch_y)
@@ -55,7 +54,7 @@ class Learner(object):
                         # Update the progress bar
                         pbar.set_postfix(Metrics=f"Loss: {minibatch_loss:.4f} - Accuracy: {minibatch_accuracy * 100:.4f}%")
                         pbar.update()
-            print(f"Epoch: {epoch + 1} - Loss: {minibatch_loss:.6f} - Accuracy: {minibatch_accuracy:.6f} - Time Taken: {time() - start_time:.2f}s.")
+            print(f"Epoch: {epoch + 1} - Loss: {minibatch_loss:.6f} - Accuracy: {minibatch_accuracy * 100:.4f} - Time Taken: {time() - start_time:.2f}s.")
             print('-' * 50 + '\n')
     
     def test(self, model: NeuralNetwork, test_set):
@@ -84,5 +83,5 @@ class Learner(object):
                 # Update the progress bar
                 pbar.set_postfix(Metrics=f"Accuracy: {minibatch_accuracy * 100:.4f}%")
                 pbar.update()
-        print(f"Test Accuracy: {minibatch_accuracy:.6f} - Time Taken: {time() - start_time:.2f}s.")
+        print(f"Test Accuracy: {minibatch_accuracy * 100:.4f} - Time Taken: {time() - start_time:.2f}s.")
         print('-' * 50 + '\n')

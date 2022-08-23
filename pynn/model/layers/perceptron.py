@@ -17,7 +17,7 @@ class Linear(object):
         self.in_features = in_features
         self.out_features = out_features
         self.initialization = initialization
-        self.bias = bias
+        self.bias_flag = bias
         self.name = name
 
         # initialize weights and bias
@@ -28,10 +28,8 @@ class Linear(object):
             'ones' : np.ones
         }
 
-        self.params = {
-            'W': initializer[self.initialization](out_features, in_features), 
-            'b': np.zeros((out_features, 1))
-        }
+        self.weight = initializer[self.initialization](out_features, in_features)
+        self.bias = np.zeros((out_features, 1))
 
         # Forward prop
         self.downstream_activation = None
@@ -54,7 +52,7 @@ class Linear(object):
         **Returns:**
             `Z`: transformed data.
         '''
-        return (np.dot(self.params['W'], self.downstream_activation.T) + self.params['b']).T
+        return (np.dot(self.weight, self.downstream_activation.T) + self.bias).T
 
     def __call__(self, x:np.ndarray):
         '''
@@ -77,9 +75,9 @@ class Linear(object):
             `downstream_grad`: downstream gradient.
         '''
         self.dW = np.dot(upstream_grad.T, self.downstream_activation)
-        if self.bias:
+        if self.bias_flag:
             self.db = np.sum(upstream_grad.T, axis=1, keepdims=True)
-        self.downstream_grad = np.array([np.sum(upstream_grad_sample * self.params['W'].T) for upstream_grad_sample in upstream_grad]).reshape(-1, 1)
+        self.downstream_grad = np.array([np.sum(upstream_grad_sample * self.weight.T) for upstream_grad_sample in upstream_grad]).reshape(-1, 1)
         return self.downstream_grad
 
     def update_params(self, lr:np.float64):
@@ -88,7 +86,9 @@ class Linear(object):
         **Parameters:**
             `lr`: learning rate.
         '''
-        self.params['W'] = self.params['W'] - lr * self.dW
-        if self.bias:
-            self.params['b'] = self.params['b'] - lr * self.db
+        new_weight = self.weight - (self.dW * lr)
+        self.weight = new_weight
+        if self.bias_flag:
+            new_bias = self.bias - (self.db * lr)
+            self.bias = new_bias
     
