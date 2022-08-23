@@ -29,7 +29,7 @@ class Linear(object):
         }
 
         self.params = {
-            'W': initializer[self.initialization](out_features, in_features),
+            'W': initializer[self.initialization](out_features, in_features), 
             'b': np.zeros((out_features, 1))
         }
 
@@ -48,13 +48,13 @@ class Linear(object):
     def __str__(self):
         return f"Linear Layer: {self.in_features} -> {self.out_features}"
     
-    def linear_transformation(self) -> np.ndarray:
+    def _linear_transformation(self) -> np.ndarray:
         '''
         Linear transformation - **Z = Wx + b**.
         **Returns:**
             `Z`: transformed data.
         '''
-        return np.dot(self.params['W'], self.downstream_activation) + self.params['b']
+        return (np.dot(self.params['W'], self.downstream_activation.T) + self.params['b']).T
 
     def __call__(self, x:np.ndarray):
         '''
@@ -64,10 +64,8 @@ class Linear(object):
         **Returns:**
             `fx`: transformed data.
         '''
-        if x.shape[0] != self.in_features:
-            x = x.flatten()
         self.downstream_activation = x
-        self.fx = self.linear_transformation()
+        self.fx = self._linear_transformation()
         return self.fx
 
     def backward(self, upstream_grad:np.ndarray) -> np.ndarray:
@@ -78,10 +76,10 @@ class Linear(object):
         **Returns:**
             `downstream_grad`: downstream gradient.
         '''
-        self.dW = np.dot(upstream_grad, self.downstream_activation.T)
+        self.dW = np.dot(upstream_grad.T, self.downstream_activation)
         if self.bias:
-            self.db = np.sum(upstream_grad, axis=1, keepdims=True)
-        self.downstream_grad = np.dot(self.params['W'].T, upstream_grad)
+            self.db = np.sum(upstream_grad.T, axis=1, keepdims=True)
+        self.downstream_grad = np.array([np.sum(upstream_grad_sample * self.params['W'].T) for upstream_grad_sample in upstream_grad]).reshape(-1, 1)
         return self.downstream_grad
 
     def update_params(self, lr:np.float64):

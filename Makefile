@@ -35,8 +35,6 @@ LOG_PATH = ./logs
 setup: create_env create_temp
 install: install_requirements
 update: update_requirements
-experiments: create_temp run_experiments
-reset: clean create_temp
 
 # rules
 create_env:
@@ -53,27 +51,3 @@ update_requirements:
 	$(PRINT) "Updating Dependencies..."
 	$(PIP) freeze > ./requirements.txt
 	$(PRINT) ""
-
-run_experiments:
-	$(PRINT) "Running experiments..."
-	$(PYTHON) ./main.py
-	$(PRINT) ""
-
-clean:
-	$(PRINT) "Cleaning weights"
-	$(REMOVE) ./weights
-	$(PRINT) "Cleaning generated samples"
-	$(REMOVE) ./samples
-	$(PRINT) "Cleaning logs"
-	$(REMOVE) ./logs
-	$(PRINT) ""
-
-create_temp:
-	$(PRINT) "Creating directory structure..."
-	$(CREATE) ./weights
-	$(CREATE) ./samples
-	$(CREATE) ./logs
-	$(PRINT) ""
-
-visualize:
-	tensorboard --logdir $(LOG_PATH)

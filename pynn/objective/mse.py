@@ -21,7 +21,7 @@ class MSE(object):
         **Returns:**
             `mse`: Mean Squared Error.
         '''
-        return 0.5*np.mean((y - y_hat)**2)
+        return 0.5*np.sum((y - y_hat)**2)/y_hat.shape[0]
     
     def _mse_grad(self, y, y_hat):
         '''
@@ -32,7 +32,7 @@ class MSE(object):
         **Returns:**
             `mse_grad`: gradient of the Mean Squared Error.
         '''
-        return (y_hat - y) / len(y_hat)
+        return (y_hat - y) / y_hat.shape[0]
     
     def __call__(self, y, y_hat):
         '''

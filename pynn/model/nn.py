@@ -48,7 +48,7 @@ class NeuralNetwork(object):
             `downstream_grad`: downstream gradient.
         '''
         for block in ['output', 'hidden', 'input']:
-            for layer in self.blocks[block]:
+            for layer in self.blocks[block][::-1]:
                 upstream_grad = layer.backward(upstream_grad)
         downstream_grad = upstream_grad
         return downstream_grad

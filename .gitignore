@@ -144,3 +144,9 @@ logs/
 
 # Mac files
 .DS_Store
+
+# Makefile
+Makefile
+
+# Environment Configuration
+.envrc

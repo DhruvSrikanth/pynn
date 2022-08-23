@@ -31,16 +31,16 @@ class Learner(object):
                 dataset = train_set if stage == 'train' else val_set
                 with tqdm(dataset, desc=f"{'Training' if stage == 'train' else 'Validation'} : {model.name}") as pbar:
                     for minibatch_x, minibatch_y in pbar:
-                        minibatch_loss = 0
+                        # Flatten the minibatch
+                        minibatch_x = list(map(lambda x: np.asarray(x).flatten(), minibatch_x))
+                        minibatch_y = list(map(lambda y: np.expand_dims(np.asarray(y), axis=0), minibatch_y))
+                        minibatch_x = np.asarray(minibatch_x)
                         minibatch_y = np.asarray(minibatch_y)
-                        minibatch_inference = np.asarray([])
-                        for x in minibatch_x:
-                            x = np.asarray(x)
-                            
-                            # Forward pass
-                            y_hat = model(x)
-                            minibatch_inference = np.append(minibatch_inference, y_hat)
-                            
+
+                        # Forward pass
+                        minibatch_yhat = model(minibatch_x)
+                        minibatch_inference = np.expand_dims(np.argmax(minibatch_yhat, axis=1), axis=1)
+
                         # Compute loss
                         minibatch_loss = L(minibatch_inference, minibatch_y)
 
@@ -50,9 +50,8 @@ class Learner(object):
                             # Update weights
                             model.update_weights(lr)
                         
-                        # Compute accuracy
-                        predictions = np.argmax(minibatch_inference, axis=0)
-                        minibatch_accuracy = np.mean(predictions == minibatch_y)
+                        minibatch_accuracy = np.mean(minibatch_inference == minibatch_y)
+                        
                         # Update the progress bar
                         pbar.set_postfix(Metrics=f"Loss: {minibatch_loss:.4f} - Accuracy: {minibatch_accuracy * 100:.4f}%")
                         pbar.update()
@@ -71,16 +70,15 @@ class Learner(object):
         start_time = time()
         with tqdm(test_set, desc=f"Testing : {model.name}") as pbar:
             for minibatch_x, minibatch_y in pbar:
-                minibatch_inference = np.asarray([])
-                for x in minibatch_x:
-                    x = np.asarray(x)
-                    # Forward pass
-                    y_hat = model(x)
-                    minibatch_inference = np.append(minibatch_inference, y_hat)
+                # Flatten the minibatch
+                minibatch_x = list(map(lambda x: np.asarray(x).flatten(), minibatch_x))
+                minibatch_x = np.asarray(minibatch_x)
+                minibatch_inference = model(minibatch_x) 
                     
                 # Compute accuracy
-                predictions = np.argmax(minibatch_inference, axis=0)
+                predictions = np.argmax(minibatch_inference, axis=1)
                 minibatch_accuracy = np.mean(predictions == minibatch_y)
+
                 # Update the progress bar
                 pbar.set_postfix(Metrics=f"Accuracy: {minibatch_accuracy * 100:.4f}%")
                 pbar.update()
