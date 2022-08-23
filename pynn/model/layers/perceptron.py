@@ -18,6 +18,7 @@ class Linear(object):
         self.out_features = out_features
         self.initialization = initialization
         self.bias_flag = bias
+        self.grad_flag = None
         self.name = name
 
         # initialize weights and bias
@@ -36,8 +37,8 @@ class Linear(object):
         self.fx = None
 
         # Backward prop
-        self.dW = None
-        self.db = None
+        self.dW = np.zeros_like(self.weight)
+        self.db = np.zeros_like(self.bias)
         self.downstream_grad = None
     
     def __repr__(self):
@@ -74,8 +75,9 @@ class Linear(object):
         **Returns:**
             `downstream_grad`: downstream gradient.
         '''
-        self.dW = np.dot(upstream_grad.T, self.downstream_activation)
-        if self.bias_flag:
+        if self.grad_flag:
+            self.dW = np.dot(upstream_grad.T, self.downstream_activation)
+        if self.bias_flag and self.grad_flag:
             self.db = np.sum(upstream_grad.T, axis=1, keepdims=True)
         self.downstream_grad = np.array([np.sum(upstream_grad_sample * self.weight.T) for upstream_grad_sample in upstream_grad]).reshape(-1, 1)
         return self.downstream_grad
@@ -91,4 +93,25 @@ class Linear(object):
         if self.bias_flag:
             new_bias = self.bias - (self.db * lr)
             self.bias = new_bias
+
+    def zero_grad(self):
+        '''
+        Zero out the gradients.
+        '''
+        dW = np.zeros_like(self.weight)
+        self.dW = dW
+        if self.bias_flag:
+            db = np.zeros_like(self.bias)
+            self.db = db
     
+    def grad(self):
+        '''
+        Allow gradient computation.
+        '''
+        self.grad_flag = True
+    
+    def no_grad(self):
+        '''
+        Do not allow gradient computation.
+        '''
+        self.grad_flag = False

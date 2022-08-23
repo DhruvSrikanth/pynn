@@ -1,2 +1,2 @@
-from .model import Sigmoid, Softmax, Linear, NeuralNetwork, Learner
+from .model import Sigmoid, Softmax, Tanh, ReLU, LeakyReLU, Linear, NeuralNetwork, Learner
 from .objective import MSE

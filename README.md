@@ -18,6 +18,9 @@ Layers:
 Activation Functions:
 1. Sigmoid
 2. Softmax (in-progress)
+3. ReLU (in-progress)
+4. Tanh (in-progress)
+5. LeakyReLU (in-progress)
 
 ## Learning Algorithms
 

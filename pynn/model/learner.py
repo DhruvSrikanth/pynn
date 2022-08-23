@@ -27,15 +27,18 @@ class Learner(object):
             print('-' * 50)
             print(f'Starting Epoch {epoch + 1}/{epochs}:')
             start_time = time()
+
             for stage in ['train', 'val']:
                 dataset = train_set if stage == 'train' else val_set
                 with tqdm(dataset, desc=f"{'Training' if stage == 'train' else 'Validation'} : {model.name}") as pbar:
                     for minibatch_x, minibatch_y in pbar:
-                        # Flatten the minibatch
                         minibatch_x = list(map(lambda x: np.asarray(x).flatten(), minibatch_x))
                         minibatch_y = list(map(lambda y: np.expand_dims(np.asarray(y), axis=0), minibatch_y))
                         minibatch_x = np.asarray(minibatch_x)
                         minibatch_y = np.asarray(minibatch_y)
+
+                        # Zero the gradients
+                        model.zero_grad()
 
                         # Forward pass
                         minibatch_yhat = model(minibatch_x)
@@ -44,10 +47,14 @@ class Learner(object):
                         # Compute loss
                         minibatch_loss = L(minibatch_inference, minibatch_y)
                         if stage == 'train':
+                            # Compute gradients
+                            model.grad()
                             # Backward pass
                             model.backward(L.backward())
                             # Update 
                             model.update_weights(lr)
+                        else:
+                            model.no_grad()
                         
                         minibatch_accuracy = np.mean(minibatch_inference == minibatch_y)
                         
@@ -67,13 +74,16 @@ class Learner(object):
         print('-' * 50)
         print(f'Testing {model.name}:')
         start_time = time()
+        # No need to compute gradients
+        model.no_grad()
         with tqdm(test_set, desc=f"Testing : {model.name}") as pbar:
             for minibatch_x, minibatch_y in pbar:
-                # Flatten the minibatch
                 minibatch_x = list(map(lambda x: np.asarray(x).flatten(), minibatch_x))
                 minibatch_y = list(map(lambda y: np.expand_dims(np.asarray(y), axis=0), minibatch_y))
                 minibatch_x = np.asarray(minibatch_x)
                 minibatch_y = np.asarray(minibatch_y)
+
+                # Forward pass
                 minibatch_inference = model(minibatch_x) 
                     
                 # Compute accuracy
