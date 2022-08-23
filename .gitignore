@@ -144,3 +144,5 @@ logs/
 
 # Mac files
 .DS_Store
+
+pynn_docs/site/
