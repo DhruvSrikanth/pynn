@@ -72,11 +72,13 @@ class Learner(object):
             for minibatch_x, minibatch_y in pbar:
                 # Flatten the minibatch
                 minibatch_x = list(map(lambda x: np.asarray(x).flatten(), minibatch_x))
+                minibatch_y = list(map(lambda y: np.expand_dims(np.asarray(y), axis=0), minibatch_y))
                 minibatch_x = np.asarray(minibatch_x)
+                minibatch_y = np.asarray(minibatch_y)
                 minibatch_inference = model(minibatch_x) 
                     
                 # Compute accuracy
-                predictions = np.argmax(minibatch_inference, axis=1)
+                predictions = np.expand_dims(np.argmax(minibatch_inference, axis=1), axis=1)
                 minibatch_accuracy = np.mean(predictions == minibatch_y)
 
                 # Update the progress bar
