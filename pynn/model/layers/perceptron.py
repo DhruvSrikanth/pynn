@@ -11,35 +11,34 @@ class Linear(object):
             `bias`: whether to use bias or not.
             `initialization`: method of initialization. 
                 **Default:** `"random"`. 
-                **Valid values:** `"random"`, `"uniform"`, `"zeros"`, `"ones"`.
+                **Valid values:** `"random"`, `"uniform"`.
             `name`: name of the layer.
         '''
         self.in_features = in_features
         self.out_features = out_features
+        
+        valid_initialization = ['random', 'uniform']
+        if initialization not in valid_initialization:
+            raise ValueError(f"Invalid weight initialization - {initialization}. Valid types include {', '.join(valid_initialization)}.")
+
         self.initialization = initialization
         self.bias_flag = bias
-        self.grad_flag = None
         self.name = name
 
         # initialize weights and bias
         initializer = {
             'random' : np.random.randn, 
-            'uniform' : np.random.uniform, 
-            'zeros' : np.zeros,
-            'ones' : np.ones
+            'uniform' : np.random.uniform
         }
 
-        self.weight = initializer[self.initialization](out_features, in_features)
-        self.bias = np.zeros((out_features, 1))
+        self.weight = initializer[self.initialization](self.in_features, self.out_features) * np.sqrt(2 / self.in_features)
+        self.bias = np.zeros(self.out_features)
 
-        # Forward prop
-        self.downstream_activation = None
+        self.x = None
         self.fx = None
-
-        # Backward prop
-        self.dW = np.zeros_like(self.weight)
-        self.db = np.zeros_like(self.bias)
-        self.downstream_grad = None
+        self.dfx = None
+        self.dW = None
+        self.db = None
     
     def __repr__(self):
         return f"Linear Layer: {self.in_features} -> {self.out_features}"
@@ -53,7 +52,18 @@ class Linear(object):
         **Returns:**
             `Z`: transformed data.
         '''
-        return (np.dot(self.weight, self.downstream_activation.T) + self.bias).T
+        return np.dot(self.x, self.weight) + self.bias
+    
+    def _linear_transformation_grad(self, upstream_grad):
+        '''
+        Linear transformation gradient.
+        **Returns:**
+            `dfx`: gradient of linear transformation. 
+        '''
+        self.dW = (np.matmul(self.x[:, :, None], upstream_grad[:, None, :])).mean(axis=0)
+        if self.bias_flag:
+            self.db = upstream_grad.mean(axis=0)
+        return np.dot(upstream_grad, self.weight.transpose())
 
     def __call__(self, x:np.ndarray):
         '''
@@ -63,8 +73,8 @@ class Linear(object):
         **Returns:**
             `fx`: transformed data.
         '''
-        self.downstream_activation = x
-        self.fx = self._linear_transformation()
+        self.x = np.copy(x)
+        self.fx =  self._linear_transformation()
         return self.fx
 
     def backward(self, upstream_grad:np.ndarray) -> np.ndarray:
@@ -73,14 +83,10 @@ class Linear(object):
         **Parameters:**
             `upstream_grad`: upstream gradient.
         **Returns:**
-            `downstream_grad`: downstream gradient.
+            `dfx`: downstream gradient.
         '''
-        if self.grad_flag:
-            self.dW = np.dot(upstream_grad.T, self.downstream_activation)
-        if self.bias_flag and self.grad_flag:
-            self.db = np.sum(upstream_grad.T, axis=1, keepdims=True)
-        self.downstream_grad = np.array([np.sum(upstream_grad_sample * self.weight.T) for upstream_grad_sample in upstream_grad]).reshape(-1, 1)
-        return self.downstream_grad
+        self.dfx = self._linear_transformation_grad(upstream_grad)
+        return self.dfx
 
     def update_params(self, lr:np.float64):
         '''
@@ -88,30 +94,6 @@ class Linear(object):
         **Parameters:**
             `lr`: learning rate.
         '''
-        new_weight = self.weight - (self.dW * lr)
-        self.weight = new_weight
+        self.weight -= lr * self.dW
         if self.bias_flag:
-            new_bias = self.bias - (self.db * lr)
-            self.bias = new_bias
-
-    def zero_grad(self):
-        '''
-        Zero out the gradients.
-        '''
-        dW = np.zeros_like(self.weight)
-        self.dW = dW
-        if self.bias_flag:
-            db = np.zeros_like(self.bias)
-            self.db = db
-    
-    def grad(self):
-        '''
-        Allow gradient computation.
-        '''
-        self.grad_flag = True
-    
-    def no_grad(self):
-        '''
-        Do not allow gradient computation.
-        '''
-        self.grad_flag = False
+            self.bias -= lr * self.db

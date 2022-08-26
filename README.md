@@ -18,9 +18,9 @@ Layers:
 Activation Functions:
 1. Sigmoid
 2. Softmax
-3. ReLU (in-progress)
+3. ReLU
 4. Tanh (in-progress)
-5. LeakyReLU (in-progress)
+5. LeakyReLU
 
 ## Learning Algorithms
 
@@ -33,5 +33,6 @@ Activation Functions:
 ## Objective Functions
 
 1. Mean Squared Error
+2. Categorical Cross Entropy
 
 

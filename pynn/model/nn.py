@@ -39,32 +39,6 @@ class NeuralNetwork(object):
         y_hat = x
         return y_hat
         
-    def no_grad(self):
-        '''
-        Disable gradient calculation.
-        '''
-        for block in ['input', 'hidden', 'output']:
-            for layer in self.blocks[block]:
-                if hasattr(layer, 'no_grad'):
-                    layer.no_grad()
-    
-    def grad(self):
-        '''
-        Allow computation of the gradients of the model.
-        '''
-        for block in ['input', 'hidden', 'output']:
-            for layer in self.blocks[block]:
-                if hasattr(layer, 'grad'):
-                    layer.grad()
-
-    def zero_grad(self):
-        '''
-        Zero out the gradients of the model.
-        '''
-        for block in ['input', 'hidden', 'output']:
-            for layer in self.blocks[block]:
-                if hasattr(layer, 'zero_grad'):
-                    layer.zero_grad()
     
     def backward(self, upstream_grad: np.ndarray) -> np.ndarray:
         '''
